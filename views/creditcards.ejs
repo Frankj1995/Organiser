@@ -1,0 +1,62 @@
+<%- include('partials/header') %>
+
+<header class='nav-header'>
+  <img class="nav-image" src="https://cdn.pixabay.com/photo/2016/11/27/21/42/stock-1863880_1280.jpg" alt="">
+  <h1 class='logo'>Card Manager</h1>
+  <input type="checkbox" id="nav-toggle" class="nav-toggle">
+  <nav>
+    <ul>
+      <li><a href="/passwords">Home</a></li>
+      <li><a href="/creditcards">Credit Cards</a></li>
+      <li><a href="/onlineaccounts">Online Acconts</a></li>
+      <li><a href="/bills">Bills</a></li>
+    </ul>
+  </nav>
+  <label for="nav-toggle" class="nav-toggle-label"><span></span></label>
+</header>
+
+<section class="cc-content">
+  <h1 class="cc-header">Manage Cards</h1>
+  <div class="cc-management">
+    <form class="cc-form" action="/carddetails" method="post">
+      <h5>Card Credentials</h5>
+      <label for="card-provider">Card Provider</label>
+      <input id="card-provider" type="text" name="card-provider">
+      <label for="account-holder">Account Holder</label>
+      <input id="account-holder" type="text" name="account-holder">
+      <label for="card-number">Card Number</label>
+      <input id="card-number" type="text" name="card-holder">
+      <label for="expiry-date">Expiry Date</label>
+      <input id="expiry-date" type="text" name=expiry-date"">
+      <label for="security-code">Security Code</label>
+      <input id="security-code" type="text" name="security-code">
+      <label for="pin">Pin</label>
+      <input id="pin" type="text" name="pin">
+      <button class="btn btn-secondary" type="sumbit" name="button">Sumbit Details</button>
+    </form>
+    <table class="cc-table">
+      <tr>
+        <th>Card Provider</th>
+        <th>Account Holder</th>
+        <th>Card Number</th>
+        <th>Expiry Date</th>
+        <th>Security Code</th>
+        <th>Pin</th>
+      </tr>
+      <tr>
+        <td>TSB</td>
+        <td>Mr Frank J Lockett</td>
+        <td>4763 6736 3278 3927</td>
+        <td>02/24</td>
+        <td>255</td>
+        <td>7866</td>
+      </tr>
+    </table>
+  </div>
+
+</section>
+
+
+
+
+<%- include('partials/footer') %>

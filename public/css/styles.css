@@ -1,0 +1,352 @@
+*, *::after, *::before {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-sizing: border-box;
+}
+
+/*************************************LOGIN************************************/
+.login-page {
+  align-items: center;
+  background-image: url(https://images.unsplash.com/photo-1557217620-07784062e4b0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1567&q=80);
+  background-color: #666;
+  background-blend-mode: multiply;
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+}
+
+.login-page div {
+  align-items: center;
+  background: rgba(39, 40, 56, 0.7);
+  border-radius: 5px;
+  display: flex;
+  height: 60vh;
+  width: 25vw;
+  justify-content: center;
+  text-align: center;
+}
+
+.login-page h1 {
+  color: white;
+  font-size: 2em;
+  text-align: center;
+}
+
+.login-page form input {
+  background: none;
+  border: 2px solid rgb(100, 97, 101);
+  border-radius: 50px;
+  color: white;
+  display: block;
+  font-size: 1em;
+  height: 3em;
+  margin: 2em auto;
+  padding: 25px 25px;
+  text-align: center;
+  transition: 0.50s;
+}
+
+.login-page form input[type='text']:hover, .login-page form input[type='password']:hover {
+  border-color: white;
+  padding: 25px 45px;
+}
+
+input:focus {
+  outline: none;
+}
+
+input::placeholder {
+  color: white;
+}
+
+.button {
+  width: 100px;
+}
+
+/***********************************PASSWORDS**********************************/
+/************************************HEADER************************************/
+.nav-header {
+  background: rgba(39, 40, 56, 0.5);
+  font-family: 'Work Sans', sans-seriff;
+  font-weight: 200;
+  height: 70px;
+  position: fixed;
+  text-align: center;
+  width: 100%;
+  z-index: 1;
+}
+
+nav {
+  background: rgba(39, 40, 56, 0.5);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  text-align: left;
+  transform: scale(1, 0);
+  transform-origin: top;
+  transition: transform 400ms ease-in-out;
+  width: 100%;
+}
+
+.nav-image {
+  display: none;
+}
+
+nav ul {
+  list-style: none;
+}
+
+nav li {
+  margin-bottom: 1em;
+  margin-left: 1em;
+}
+
+nav a {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 200;
+  opacity: 0;
+  text-transform: uppercase;
+  transition: opacity 150ms ease-in;
+}
+
+.nav-toggle {
+  display: none;
+}
+
+.nav-toggle-label {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  left: 0;
+  margin-left: 1em;
+  position: absolute;
+  top: 0;
+}
+
+.nav-toggle-label span, .nav-toggle-label span::before, .nav-toggle-label span::after {
+  background: white;
+  display: block;
+  height: 2px;
+  width: 2em;
+}
+
+.nav-toggle-label span::before, .nav-toggle-label span::after {
+  content: '';
+  position: absolute;
+}
+
+.nav-toggle-label span::before {
+  top: 30px;
+}
+
+.nav-toggle-label span::after {
+  bottom: 30px;
+}
+
+.nav-toggle:checked~nav {
+  transform: scale(1, 1);
+}
+
+.nav-toggle:checked~nav a {
+  opacity: 1;
+  transition: opacity 400ms 250ms ease-in;
+}
+
+@media screen and (min-width: 800px) {
+  .nav-toggle-label {
+    display: none;
+  }
+
+  header {
+    display: grid;
+    grid-template-columns: minmax(100px, 1fr) 1fr auto minmax(600px, 1fr) 100px;
+  }
+
+  .nav-image {
+    box-shadow: 0px 2px 5px;
+    display: inline-grid;
+    grid-column: 1/2;
+    width: 120%;
+    height: 100%;
+    opacity: 0.2;
+    object-fit: cover;
+  }
+
+  .logo {
+    align-self: center;
+    color: rgb(255, 255, 255);
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    grid-column: 2/ 3;
+    position: relative;
+    top: 4px;
+    right: 345px;
+  }
+
+  nav {
+    all: unset;
+    align-items: center;
+    display: flex;
+    grid-column: 4/5;
+    justify-content: flex-end;
+  }
+
+  nav a {
+    opacity: 1;
+    font-size: 1.1em;
+  }
+
+  nav a::before {
+    background: white;
+    content: '';
+    display: block;
+    height: 2px;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: -.3em;
+    transform: scale(0, 1);
+    transition: transform 200ms ease-in-out;
+  }
+
+  nav a:hover::before {
+    transform: scale(1, 1);
+  }
+
+  nav a:hover {
+    text-decoration: none;
+    color: grey;
+  }
+
+  nav ul {
+    display: flex;
+    position: relative;
+    top: 17px;
+    right: 50px;
+  }
+
+  nav li {
+    margin-left: 2.5em;
+    position: relative;
+  }
+}
+
+/************************************CONTENT***********************************/
+.content {
+  background-image: url(https://images.unsplash.com/photo-1557217620-07784062e4b0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1567&q=80);
+  background-color: #666;
+  background-blend-mode: multiply;
+  height: 100vh;
+}
+
+.items {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 15vh 5% 0;
+}
+
+.content-img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.items figure {
+  position: relative;
+  margin: 0;
+}
+
+.items figcaption {
+  background: rgba(2, 87, 108, .4);
+  bottom: 0;
+  color: white;
+  left: 0;
+  opacity: 0;
+  padding-left: 5%;
+  padding-top: 5%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: opacity 500ms ease-in-out;
+}
+
+.items figcaption:hover {
+  opacity: 1;
+}
+
+@media screen and (max-width: 700px) {
+  .items {
+    grid-template-columns: 100%;
+  }
+}
+
+/**********************************CREDIT CARDS********************************/
+table, th, td {
+  border: 2px solid grey;
+}
+
+th {
+  background-image: linear-gradient(#3A3B4A 5%, #9C9DA4);
+  font-weight: 600;
+  padding: 10px 0;
+  text-align: center;
+}
+
+td {
+  font-weight: 200;
+  padding: 5px 0px 5px 7px;
+}
+
+.btn {
+  margin-top: .8em;
+}
+
+.cc-form h5 {
+  font-weight: 600;
+}
+
+.card-type {
+  margin: 7px 20px 15px 0;
+}
+
+.cc-content {
+  padding-top: 6em;
+  background-image: linear-gradient(#B0B0B6, #3A3B4A);
+  height: 110vh;
+}
+
+.cc-header {
+  color: white;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  text-align: center;
+}
+
+.cc-management {
+  color: white;
+  display: grid;
+  font-family: 'Roboto', sans-serif;
+  grid-template-columns: 18% 70%;
+  grid-column-gap: 7%;
+  padding: 2% 8% 0;
+}
+
+.cc-form input {
+  background: #EBEBEC;
+  opacity: .6;
+  border-radius: 5px;
+  margin-bottom: .8em;
+  padding-left: 10px;
+  width: 100%;
+}
+
+.cc-form label::after {
+  content: '';
+  background-color: white;
+  display: block;
+  height: 1px;
+  width: 215px;
+  margin: 3px 0;
+}

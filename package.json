@@ -15,6 +15,7 @@
     "dotenv": "^8.0.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
+    "lodash": "^4.17.11",
     "mongoose": "^5.5.6",
     "mongoose-encryption": "^2.0.2"
   }

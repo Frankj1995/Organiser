@@ -13,6 +13,10 @@ button:focus {
   outline: 0;
 }
 
+.block {
+  display: block;
+}
+
 /*************************************LOGIN************************************/
 .login-page {
   align-items: center;
@@ -169,7 +173,7 @@ nav a {
 
   header {
     display: grid;
-    grid-template-columns: minmax(100px, 1fr) 1fr auto minmax(600px, 1fr) 100px;
+    grid-template-columns: minmax(100px, 1fr) 1fr auto minmax(600px, 3fr) 100px;
   }
 
   .nav-image {
@@ -180,6 +184,7 @@ nav a {
     height: 100%;
     opacity: 0.2;
     object-fit: cover;
+    position: relative;
   }
 
   .logo {
@@ -188,9 +193,9 @@ nav a {
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
     grid-column: 2/ 3;
-    position: relative;
-    top: 4px;
-    right: 345px;
+    left: -267px;
+    position: absolute;
+    width: 300px;
   }
 
   nav {
@@ -199,6 +204,8 @@ nav a {
     display: flex;
     grid-column: 4/5;
     justify-content: flex-end;
+    left: 70px;
+    position: relative;
   }
 
   nav a {
@@ -241,7 +248,7 @@ nav a {
   }
 }
 
-/************************************CONTENT***********************************/
+/*********************************HOME CONTENT*********************************/
 .content {
   background-image: url(https://images.unsplash.com/photo-1557217620-07784062e4b0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1567&q=80);
   background-color: #666;
@@ -290,7 +297,7 @@ nav a {
   }
 }
 
-/**********************************CREDIT CARDS********************************/
+/**********************************MAIN CONTENT********************************/
 table, th, td {
   border: 2px solid grey;
 }
@@ -307,7 +314,7 @@ td {
   padding: 5px 0px 5px 7px;
 }
 
-.cc-content {
+.main-content {
   animation: background-change 10s ease-in-out infinite;
   padding-top: 5.3em;
   background-blend-mode: overlay;
@@ -316,11 +323,28 @@ td {
   height: 100vh;
 }
 
-.btn {
-  margin-top: .1em;
+.main-header {
+  color: white;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  text-align: center;
 }
 
-.cc-form h5 {
+
+.main-management {
+  color: white;
+  display: grid;
+  font-family: 'Roboto', sans-serif;
+  grid-template-columns: 18% 77%;
+  grid-column-gap: 5%;
+  padding: 1.5% 4% 0;
+}
+
+.btn {
+  margin-top: .2em;
+}
+
+.form h5 {
   font-weight: 600;
 }
 
@@ -342,23 +366,11 @@ td {
   }
 }
 
-.cc-header {
-  color: white;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 300;
-  text-align: center;
+.type-dropdown {
+  margin-bottom: .8em;
 }
 
-.cc-management {
-  color: white;
-  display: grid;
-  font-family: 'Roboto', sans-serif;
-  grid-template-columns: 18% 77%;
-  grid-column-gap: 5%;
-  padding: 1.5% 4% 0;
-}
-
-.cc-form input {
+.form input {
   background: #EBEBEC;
   opacity: .6;
   border-radius: 5px;
@@ -367,7 +379,7 @@ td {
   width: 100%;
 }
 
-.cc-form label::after {
+.form label::after {
   content: '';
   background-color: white;
   display: block;

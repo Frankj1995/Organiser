@@ -1,5 +1,4 @@
 var deleteBtn = document.getElementsByClassName('delete-btn');
-var obDeleteBtn = document.getElementsByClassName('ob-delete-btn');
 var pwShowBtn = document.getElementsByClassName('show-password');
 
 
@@ -10,18 +9,6 @@ for (i = 0; i < deleteBtn.length; i++) {
 }
 
 if(deleteBtn.length > 0) {
-  document.querySelector('.close').addEventListener('click', function() {
-    document.querySelector('.modal').style.display = 'none';
-  });
-}
-
-for (i = 0; i < obDeleteBtn.length; i++) {
-  obDeleteBtn[i].addEventListener('click', function() {
-    document.querySelector('.modal').style.display = 'flex';
-  });
-}
-
-if(obDeleteBtn.length > 0) {
   document.querySelector('.close').addEventListener('click', function() {
     document.querySelector('.modal').style.display = 'none';
   });

@@ -6,8 +6,9 @@
   <input type="checkbox" id="nav-toggle" class="nav-toggle">
   <nav>
     <ul>
-      <li><a href="/passwords">Home</a></li>
-      <li><a href="/creditcards">Credit Cards</a></li>
+      <li><a href="/">Home</a></li>
+      <li><a href="/cards">Credit Cards</a></li>
+      <li><a href="/onlinebanking">Online Banking</a></li>
       <li><a href="/onlineaccounts">Online Acconts</a></li>
       <li><a href="/bills">Bills</a></li>
     </ul>
@@ -15,10 +16,10 @@
   <label for="nav-toggle" class="nav-toggle-label"><span></span></label>
 </header>
 
-<section class="cc-content">
-  <h1 class="cc-header">Manage Cards</h1>
-  <div class="cc-management">
-    <form class="cc-form" action="/creditcards" method="post">
+<section class="main-content">
+  <h1 class="main-header">Manage Cards</h1>
+  <div class="main-management">
+    <form class="form" action="/cards" method="post">
       <h5>Card Credentials</h5>
       <label for="unique_id">Unique ID</label>
       <input id="unique_id" type="text" name="unique_id">
@@ -82,11 +83,11 @@
     </div>
     <img class="trash-img" src="images/trash.jpg" alt="trash icon">
     <div class="delete-content">
-      <form class="" action="/ccdelete" method="post">
+      <form class="" action="/cardsdelete" method="post">
         <input type="text" name="unique_id" placeholder="Unique ID">
         <input type="text" name="username" placeholder="Username">
         <input type="password" name="password" placeholder="Password">
-        <button id="trash-btn" class="btn btn-outline-dark btn-sm trash-btn" type="submit" name="button">Delete</button>
+        <button id="trash-btn" class="btn btn-outline-dark btn-sm trash-btn" type="submit" name="button">Delete NOW</button>
       </form>
     </div>
   </div>

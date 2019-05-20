@@ -183,16 +183,16 @@ app.get('/passwords', function(req, res) {
 
 /********************************CREDIT CARDS**********************************/
 
-app.route('/creditcards')
+app.route('/cards')
   .get(function(req, res) {
     Card.find(function(err, entry) {
       if (!err) {
         if (entry) {
-          res.render('creditcards', {
+          res.render('cards', {
             entries: entry
           });
         } else {
-          res.render('creditcards');
+          res.render('cards');
         }
       } else {
         console.log(err);
@@ -211,7 +211,7 @@ app.route('/creditcards')
       pin: req.body.pin
     })
     newCard.save();
-    res.redirect('/creditcards');
+    res.redirect('/cards');
   });
 
 app.post('/pw-card-show', function(req, res) {
@@ -252,7 +252,7 @@ app.post('/pw-card-show', function(req, res) {
   });
 });
 
-app.post('/ccdelete', function(req, res) {
+app.post('/cardsdelete', function(req, res) {
   Admin.findOne({
     username: req.body.username
   }, function(err, admin) {
@@ -264,7 +264,7 @@ app.post('/ccdelete', function(req, res) {
               unique_id: req.body.unique_id
             }, function(err) {
               if (!err) {
-                res.redirect('/creditcards');
+                res.redirect('/cards');
               } else {
                 console.log(err);
                 res.send('Please enter valid unique ID');
@@ -529,9 +529,8 @@ app.route('/bills')
         console.log(err);
       }
     });
+    res.redirect('/bills');
   })
-
-
 
 app.post('/pw-bill-show', function(req, res) {
   Admin.findOne({
@@ -584,7 +583,7 @@ app.post('/billdelete', function(req, res) {
                 unique_id: req.body.unique_id
               }, function(err) {
                 if (!err) {
-                  res.redirect('/onlineaccounts');
+                  res.redirect('/bills');
                 } else {
                   console.log(err);
                   res.send('Please enter valid unique ID.');

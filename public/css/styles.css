@@ -5,6 +5,14 @@
   box-sizing: border-box;
 }
 
+button {
+  outline: none;
+}
+
+button:focus {
+  outline: 0;
+}
+
 /*************************************LOGIN************************************/
 .login-page {
   align-items: center;
@@ -299,8 +307,17 @@ td {
   padding: 5px 0px 5px 7px;
 }
 
+.cc-content {
+  animation: background-change 10s ease-in-out infinite;
+  padding-top: 5.3em;
+  background-blend-mode: overlay;
+  background-image: linear-gradient(-45deg, #9C9DA4, #61626E);
+  background-size: 400%;
+  height: 100vh;
+}
+
 .btn {
-  margin-top: .8em;
+  margin-top: .1em;
 }
 
 .cc-form h5 {
@@ -311,10 +328,18 @@ td {
   margin: 7px 20px 15px 0;
 }
 
-.cc-content {
-  padding-top: 6em;
-  background-image: linear-gradient(#B0B0B6, #3A3B4A);
-  height: 110vh;
+@keyframes background-change {
+  0% {
+    background-position: 0 50%
+  }
+
+  50% {
+    background-position: 100% 50%
+  }
+
+  100% {
+    background-position: 0 50%
+  }
 }
 
 .cc-header {
@@ -328,9 +353,9 @@ td {
   color: white;
   display: grid;
   font-family: 'Roboto', sans-serif;
-  grid-template-columns: 18% 70%;
-  grid-column-gap: 8%;
-  padding: 2% 8% 0;
+  grid-template-columns: 18% 77%;
+  grid-column-gap: 5%;
+  padding: 1.5% 4% 0;
 }
 
 .cc-form input {
@@ -347,7 +372,7 @@ td {
   background-color: white;
   display: block;
   height: 1px;
-  width: 215px;
+  width: 235px;
   margin: 3px 0;
 }
 
@@ -367,8 +392,8 @@ td {
   text-align: center;
 }
 
-/***********************************CC - MODAL*********************************/
-.cc-modal {
+/***********************************MODAL*********************************/
+.modal {
   align-items: center;
   background-color: rgba(0, 0, 0, .7);
   display: flex;
@@ -405,7 +430,7 @@ td {
 .trash-img {
   align-self: center;
   height: 80px;
-  width: 80px;
+  width: 130px;
   margin-bottom: 7px;
 }
 
@@ -422,4 +447,61 @@ td {
   right: 14px;
   top: 2px;
   transform: rotate(45deg);
+}
+
+/***********************************PW MODAL**********************************/
+.pw-modal {
+  align-items: center;
+  background-color: rgba(0, 0, 0, .7);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  display: none;
+}
+
+.modal-height{
+  height: 330px;
+}
+
+.pw-img {
+  align-self: center;
+  width: 150px;
+  height: 100px;
+  margin-bottom: 7px;
+}
+
+.pw-close {
+  cursor: pointer;
+  font-size: 35px;
+  position: absolute;
+  right: 14px;
+  top: 2px;
+  transform: rotate(45deg);
+}
+
+.show-pw-content {
+  text-align: center;
+}
+
+.show-pw-content form input {
+  background-color: #C4C4C8;
+  border-radius: 3px;
+  display: block;
+  height: 27px;
+  padding-left: 7px;
+  margin: 15px auto 0;
+}
+
+.text-decoration {
+  background: none;
+  color: white;
+}
+
+.text-decoration:hover {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: underline;
+  cursor: pointer;
 }

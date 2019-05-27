@@ -6,10 +6,11 @@ const encrypt = require('mongoose-encryption');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const session = require('express-session');
+const passport = require('passport');
+const passportLocalMongoose = require('passport-local-mongoose');
 
-const adminUsername = process.env.USERNAME;
-const adminPassword = process.env.SECRET;
-const secret = process.env.MSECRET;
+const secret = process.env.SECRET;
 
 const app = express();
 
@@ -19,21 +20,26 @@ app.use(bodyParser.urlencoded({
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
+app.use(session({
+  secret: secret,
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 mongoose.connect('mongodb://localhost:27017/passwordDB', {
   useNewUrlParser: true
 });
 
+mongoose.set('useCreateIndex', true);
+
 /***********************************SCHEMAS************************************/
 
-const adminScehma = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true
-  },
-  password: {
-    type: String,
-    required: true
-  }
+const adminSchema = new mongoose.Schema({
+  username: String,
+  password: String
 });
 
 const passwordSchema = new mongoose.Schema({
@@ -109,6 +115,8 @@ const billSchema = new mongoose.Schema({
 
 /***********************************PLUGINS************************************/
 
+adminSchema.plugin(passportLocalMongoose);
+
 cardSchema.plugin(encrypt, {
   secret: secret,
   encryptedFields: ['card_number', 'expiry_date', 'pin']
@@ -127,29 +135,38 @@ onlineAccountSchema.plugin(encrypt, {
 /*********************************COLLECTIONS**********************************/
 
 const Password = mongoose.model('password', passwordSchema);
-const Admin = mongoose.model('admin', adminScehma);
+const User = mongoose.model('user', userSchema);
 const Card = mongoose.model('card', cardSchema);
 const OnlineBank = mongoose.model('onlineBank', onlineBankSchema);
 const OnlineAccount = mongoose.model('onlineAccount', onlineAccountSchema);
 const Bill = mongoose.model('bill', billSchema);
 
+/*********************************PASSPORT*************************************/
+
+passport.use(Admin.createStrategy());
+
+passport.serializeUser(Admin.serializeUser());
+passport.deserializeUser(Admin.deserializeUser());
+
 /***********************************BCRYPT*************************************/
 
-function encryptPassword(username, password, saltRounds) {
+function registerAdmin(username, password) {
   Admin.find(function(err, admin) {
     if (admin.length === 0) {
-      bcrypt.hash(password, saltRounds, function(err, hash) {
-        const newAdmin = new Admin({
-          username: username,
-          password: hash
-        });
-        newAdmin.save();
+      Admin.register({
+        username: username
+      }, password, function(err, user) {
+        if (err) {
+          console.log(err);
+        } else {
+          passport.authenticate('local')(function() {})
+        }
       });
     }
-  });
+  })
 }
 
-encryptPassword(adminUsername, adminPassword, saltRounds);
+registerAdmin(adminUsername, adminPassword);
 
 /*********************************LOGIN PAGE***********************************/
 
@@ -158,19 +175,44 @@ app.get('/', function(req, res) {
 });
 
 app.post('/login', function(req, res) {
-  Admin.findOne({
-    username: req.body.username
-  }, function(err, admin) {
-    if (admin) {
-      bcrypt.compare(req.body.password, admin.password, function(err, result) {
-        if (result === true) {
-          res.render('passwords');
-        } else {
-          res.send('Incorrect password');
-        }
-      });
+  const admin = new Admin({
+    username: req.body.username,
+    password: req.body.password
+  })
+
+  req.login(admin, function(err) {
+    if (err) {
+      console.log(err);
     } else {
-      res.send('Could not find user with that username.');
+      passport.authenticate('local')(req, res, function() {
+        res.redirect('/passwords');
+      });
+    }
+  });
+});
+
+app.get('/logout', function(req, res) {
+  req.logout();
+  res.redirect('/');
+})
+
+/*********************************REGISTER PAGE********************************/
+
+app.get('/register', function(req, res) {
+  res.render('register');
+});
+
+app.post('/register', function(req, res) {
+  User.register({
+    username: req.body.username
+  }, req.body.password, function(err, user) {
+    if (err) {
+      console.log(err);
+      res.redirect('/register');
+    } else {
+      passport.authenticate('local')(req, res, function() {
+        res.redirect('/passwords');
+      })
     }
   });
 });
@@ -178,7 +220,16 @@ app.post('/login', function(req, res) {
 /**********************************HOME PAGE***********************************/
 
 app.get('/passwords', function(req, res) {
-  res.render('passwords');
+  if (req.isAuthenticated()) {
+    res.render('passwords');
+  } else {
+    res.redirect('/');
+  }
+});
+
+app.get('/logout', function(req, res) {
+  req.logout();
+  res.redirect('/');
 });
 
 /********************************CREDIT CARDS**********************************/
@@ -209,76 +260,55 @@ app.route('/cards')
       expiry_date: req.body.expiry_date,
       security_code: req.body.security_code,
       pin: req.body.pin
-    })
+    });
     newCard.save();
     res.redirect('/cards');
   });
 
 app.post('/pw-card-show', function(req, res) {
-  Admin.findOne({
-    username: req.body.username
-  }, function(err, admin) {
-    if (!err) {
-      if (admin) {
-        bcrypt.compare(req.body.password, admin.password, function(err, result) {
-          if (!err) {
-            if (result === true) {
-              Card.findOne({
-                unique_id: req.body.unique_id
-              }, function(err, card) {
-                if (!err) {
-                  if (card) {
-                    res.send('Security Code: ' + card.security_code + '  Pin: ' + card.pin);
-                  } else {
-                    res.send('Please enter a valid unique ID.');
-                  }
-                } else {
-                  console.log(err);
-                }
-              });
-            } else {
-              res.send('Please enter valid administrator password.');
-            }
-          } else {
-            console.log(err);
-          }
-        });
-      } else {
-        res.send('Please enter correct administrator username.');
-      }
-    } else {
+  const admin = new Admin({
+    username: req.body.username,
+    password: req.body.password
+  });
+  req.login(admin, function(err) {
+    if (err) {
       console.log(err);
+    } else {
+      Card.findOne({
+        unique_id: req.body.unique_id
+      }, function(err, card) {
+        if (!err) {
+          if (card) {
+            res.send('Security Code: ' + card.security_code + '  Pin: ' + card.pin);
+          } else {
+            res.send('Please enter a valid unique ID.');
+          }
+        } else {
+          console.log(err);
+        }
+      });
     }
   });
 });
 
 app.post('/cardsdelete', function(req, res) {
-  Admin.findOne({
-    username: req.body.username
-  }, function(err, admin) {
-    if (!err) {
-      if (admin) {
-        bcrypt.compare(req.body.password, admin.password, function(err, result) {
-          if (result === true) {
-            Card.deleteOne({
-              unique_id: req.body.unique_id
-            }, function(err) {
-              if (!err) {
-                res.redirect('/cards');
-              } else {
-                console.log(err);
-                res.send('Please enter valid unique ID');
-              }
-            });
-          } else {
-            res.send('Please enter valid administrator password.');
-          }
-        });
-      } else {
-        res.send('Please enter correct administrator username.');
-      }
-    } else {
+  const admin = new Admin({
+    username: req.body.username,
+    password: req.body.password
+  });
+  req.login(admin, function(err) {
+    if (err) {
       console.log(err);
+    } else {
+      Card.deleteOne({
+        unique_id: req.body.unique_id
+      }, function(err) {
+        if (!err) {
+          res.redirect('/cards');
+        } else {
+          console.log(err);
+        }
+      });
     }
   });
 });
@@ -314,74 +344,50 @@ app.route('/onlinebanking')
   });
 
 app.post('/pw-ob-show', function(req, res) {
-  Admin.findOne({
-    username: req.body.username
-  }, function(err, admin) {
-    if (!err) {
-      if (admin) {
-        bcrypt.compare(req.body.password, admin.password, function(err, result) {
-          if (!err) {
-            if (result === true) {
-              OnlineBank.findOne({
-                unique_id: req.body.unique_id
-              }, function(err, onlineBank) {
-                if (!err) {
-                  if (onlineBank) {
-                    res.send('Password: ' + onlineBank.password);
-                  } else {
-                    res.send('Please enter a valid unique ID.');
-                  }
-                } else {
-                  console.log(err);
-                }
-              });
-            } else {
-              res.send('Please enter valid administrator password.');
-            }
-          } else {
-            console.log(err);
-          }
-        });
-      } else {
-        res.send('Please enter correct administrator username.');
-      }
-    } else {
+  const admin = new Admin({
+    username: req.body.username,
+    password: req.body.password
+  });
+
+  req.login(admin, function(err) {
+    if (err) {
       console.log(err);
+    } else {
+      OnlineBank.findOne({
+        unique_id: req.body.unique_id
+      }, function(err, bank) {
+        if (!err) {
+          if (bank) {
+            res.send('Password: ' + bank.password);
+          } else {
+            res.send('Please enter a valid unique ID.');
+          }
+        } else {
+          console.log(err);
+        }
+      });
     }
   });
 });
 
 app.post('/obdelete', function(req, res) {
-  Admin.findOne({
-    username: req.body.username
-  }, function(err, admin) {
-    if (!err) {
-      if (admin) {
-        bcrypt.compare(req.body.password, admin.password, function(err, result) {
-          if (!err) {
-            if (result === true) {
-              OnlineBank.deleteOne({
-                unique_id: req.body.unique_id
-              }, function(err) {
-                if (!err) {
-                  res.redirect('/onlinebanking');
-                } else {
-                  console.log(err);
-                  res.send('Please enter valid unique ID.');
-                }
-              });
-            } else {
-              res.send('Please enter valid administrator password.');
-            }
-          } else {
-            console.log(err);
-          }
-        });
-      } else {
-        res.send('Please enter correct administrator username.');
-      }
-    } else {
+  const admin = new Admin({
+    username: req.body.username,
+    password: req.body.password
+  });
+  req.login(admin, function(err) {
+    if (err) {
       console.log(err);
+    } else {
+      OnlineBank.deleteOne({
+        unique_id: req.body.unique_id
+      }, function(err) {
+        if (!err) {
+          res.redirect('/onlinebanking');
+        } else {
+          console.log(err);
+        }
+      });
     }
   });
 });
@@ -423,74 +429,49 @@ app.route('/onlineaccounts')
   })
 
 app.post('/pw-oa-show', function(req, res) {
-  Admin.findOne({
-    username: req.body.username
-  }, function(err, admin) {
-    if (!err) {
-      if (admin) {
-        bcrypt.compare(req.body.password, admin.password, function(err, result) {
-          if (!err) {
-            if (result === true) {
-              OnlineAccount.findOne({
-                unique_id: req.body.unique_id
-              }, function(err, onlineAccount) {
-                if (!err) {
-                  if (onlineAccount) {
-                    res.send('Password: ' + onlineAccount.password);
-                  } else {
-                    res.send('Please enter a valid unique ID.');
-                  }
-                } else {
-                  console.log(err);
-                }
-              });
-            } else {
-              res.send('Please enter valid administrator password.');
-            }
-          } else {
-            console.log(err);
-          }
-        });
-      } else {
-        res.send('Please enter correct administrator username.');
-      }
-    } else {
+  const admin = new Admin({
+    username: req.body.username,
+    password: req.body.password
+  });
+  req.login(admin, function(err) {
+    if (err) {
       console.log(err);
+    } else {
+      OnlineAccount.findOne({
+        unique_id: req.body.unique_id
+      }, function(err, account) {
+        if (!err) {
+          if (account) {
+            res.send('Password: ' + account.password);
+          } else {
+            res.send('Please enter a valid unique ID.');
+          }
+        } else {
+          console.log(err);
+        }
+      });
     }
   });
 });
 
 app.post('/oadelete', function(req, res) {
-  Admin.findOne({
-    username: req.body.username
-  }, function(err, admin) {
-    if (!err) {
-      if (admin) {
-        bcrypt.compare(req.body.password, admin.password, function(err, result) {
-          if (!err) {
-            if (result === true) {
-              OnlineAccount.deleteOne({
-                unique_id: req.body.unique_id
-              }, function(err) {
-                if (!err) {
-                  res.redirect('/onlineaccounts');
-                } else {
-                  console.log(err);
-                  res.send('Please enter valid unique ID.');
-                }
-              });
-            } else {
-              res.send('Please enter valid administrator password.');
-            }
-          } else {
-            console.log(err);
-          }
-        });
-      } else {
-        res.send('Please enter correct administrator username.');
-      }
-    } else {
+  const admin = new Admin({
+    username: req.body.username,
+    password: req.body.password
+  });
+  req.login(admin, function(err) {
+    if (err) {
       console.log(err);
+    } else {
+      OnlineAccount.deleteOne({
+        unique_id: req.body.unique_id
+      }, function(err) {
+        if (!err) {
+          res.redirect('/onlineaccounts');
+        } else {
+          console.log(err);
+        }
+      });
     }
   });
 });
@@ -530,77 +511,26 @@ app.route('/bills')
       }
     });
     res.redirect('/bills');
-  })
-
-app.post('/pw-bill-show', function(req, res) {
-  Admin.findOne({
-    username: req.body.username
-  }, function(err, admin) {
-    if (!err) {
-      if (admin) {
-        bcrypt.compare(req.body.password, admin.password, function(err, result) {
-          if (!err) {
-            if (result === true) {
-              Bill.findOne({
-                unique_id: req.body.unique_id
-              }, function(err, onlineAccount) {
-                if (!err) {
-                  if (onlineAccount) {
-                    res.send('Password: ' + onlineAccount.password);
-                  } else {
-                    res.send('Please enter a valid unique ID.');
-                  }
-                } else {
-                  console.log(err);
-                }
-              });
-            } else {
-              res.send('Please enter valid administrator password.');
-            }
-          } else {
-            console.log(err);
-          }
-        });
-      } else {
-        res.send('Please enter correct administrator username.');
-      }
-    } else {
-      console.log(err);
-    }
   });
-});
 
 app.post('/billdelete', function(req, res) {
-  Admin.findOne({
-    username: req.body.username
-  }, function(err, admin) {
-    if (!err) {
-      if (admin) {
-        bcrypt.compare(req.body.password, admin.password, function(err, result) {
-          if (!err) {
-            if (result === true) {
-              Bill.deleteOne({
-                unique_id: req.body.unique_id
-              }, function(err) {
-                if (!err) {
-                  res.redirect('/bills');
-                } else {
-                  console.log(err);
-                  res.send('Please enter valid unique ID.');
-                }
-              });
-            } else {
-              res.send('Please enter valid administrator password.');
-            }
-          } else {
-            console.log(err);
-          }
-        });
-      } else {
-        res.send('Please enter correct administrator username.');
-      }
-    } else {
+  const admin = new Admin({
+    username: req.body.username,
+    password: req.body.password
+  });
+  req.login(admin, function(err) {
+    if (err) {
       console.log(err);
+    } else {
+      Bill.deleteOne({
+        unique_id: req.body.unique_id
+      }, function(err) {
+        if (!err) {
+          res.redirect('/bills');
+        } else {
+          console.log(err);
+        }
+      });
     }
   });
 });

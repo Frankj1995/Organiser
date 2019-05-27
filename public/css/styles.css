@@ -61,7 +61,6 @@ button:focus {
 
 .login-page form input[type='text']:hover, .login-page form input[type='password']:hover {
   border-color: white;
-  padding: 25px 45px;
 }
 
 input:focus {
@@ -74,6 +73,7 @@ input::placeholder {
 
 .button {
   width: 100px;
+  margin-right: .6em;
 }
 
 /***********************************PASSWORDS**********************************/

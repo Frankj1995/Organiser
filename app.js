@@ -30,7 +30,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect('mongodb+srv://admin-frank:' + dbatlas + '@cluster0-eus86.mongodb.net/organiserDB', {
+mongoose.connect('mongodb+srv://admin-frank:TPSbvQ5ElofXKwr5@cluster0-eus86.mongodb.net/organiserDB', {
   useNewUrlParser: true
 });
 

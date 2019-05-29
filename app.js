@@ -30,7 +30,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect('mongodb+srv://admin-frank:TPSbvQ5ElofXKwr5@cluster0-eus86.mongodb.net/organiserDB', {
+// mongoose.connect('mongodb+srv://admin-frank:TPSbvQ5ElofXKwr5@cluster0-eus86.mongodb.net/organiserDB', {
+//   useNewUrlParser: true
+// });
+
+mongoose.connect('mongodb://localhost:27017/passwordDB', {
   useNewUrlParser: true
 });
 
@@ -101,15 +105,8 @@ const Bill = mongoose.model('bill', billSchema);
 passport.use(User.createStrategy());
 
 
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
-  });
-});
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 
 /*********************************LOGIN PAGE***********************************/
@@ -266,7 +263,7 @@ app.post('/cardsdelete', function(req, res) {
 app.route('/onlinebanking')
   .get(function(req, res) {
     if (req.isAuthenticated()) {
-      if (req.user.onlinebank) {
+      if (req.user.onlinebank.length > 0 && req.user.onlinebank.length != undefined) {
         res.render('onlinebanking/onlinebanking', {
           onlinebank: req.user.onlinebank
         })

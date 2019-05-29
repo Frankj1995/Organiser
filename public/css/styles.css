@@ -171,15 +171,19 @@ nav a {
     display: none;
   }
 
+  .nav-toggle {
+    display: none;
+  }
+
   header {
     display: grid;
-    grid-template-columns: minmax(100px, 1fr) 1fr auto minmax(600px, 3fr) 100px;
+    grid-template-columns: minmax(100px, 270px) 1fr;
+    position: relative;
   }
 
   .nav-image {
     box-shadow: 0px 2px 5px;
     display: inline-grid;
-    grid-column: 1/2;
     width: 120%;
     height: 100%;
     opacity: 0.2;
@@ -192,8 +196,7 @@ nav a {
     color: rgb(255, 255, 255);
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
-    grid-column: 2/ 3;
-    left: -267px;
+    grid-column: 1/ 2;
     position: absolute;
     width: 300px;
   }
@@ -204,7 +207,7 @@ nav a {
     display: flex;
     grid-column: 4/5;
     justify-content: flex-end;
-    left: 70px;
+    right: 20px;
     position: relative;
   }
 
@@ -300,6 +303,7 @@ nav a {
 /**********************************MAIN CONTENT********************************/
 table, th, td {
   border: 2px solid grey;
+  color: white;
 }
 
 th {
@@ -329,7 +333,6 @@ td {
   font-weight: 300;
   text-align: center;
 }
-
 
 .main-management {
   color: white;
@@ -474,7 +477,7 @@ td {
   display: none;
 }
 
-.modal-height{
+.modal-height {
   height: 330px;
 }
 

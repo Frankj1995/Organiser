@@ -1,0 +1,116 @@
+<%- include('../partials/header') %>
+
+<header class='nav-header'>
+  <img class="nav-image" src="https://cdn.pixabay.com/photo/2016/11/27/21/42/stock-1863880_1280.jpg" alt="">
+  <h1 class='logo'>Card Manager</h1>
+  <input type="checkbox" id="nav-toggle" class="nav-toggle">
+  <nav>
+    <ul>
+      <li><a href="/passwords">Home</a></li>
+      <li><a href="/cards">Credit Cards</a></li>
+      <li><a href="/onlinebanking">Online Banking</a></li>
+      <li><a href="/onlineaccounts">Online Acconts</a></li>
+      <li><a href="/bills">Bills</a></li>
+      <li><a href="/logout">Log Out</a></li>
+    </ul>
+  </nav>
+  <label for="nav-toggle" class="nav-toggle-label"><span></span></label>
+</header>
+
+<section class="main-content">
+  <h1 class="main-header">Manage Cards</h1>
+  <div class="main-management">
+    <form class="form" action="/cards" method="post">
+      <h5>Card Credentials</h5>
+      <label for="unique_id">Unique ID</label>
+      <input id="unique_id" type="text" name="unique_id">
+      <label for="card-provider">Card Provider</label>
+      <input id="card-provider" type="text" name="card_provider">
+      <label for="account-holder">Account Holder</label>
+      <input id="account-holder" type="text" name="account_holder">
+      <label for="card-number">Card Number</label>
+      <input id="card-number" type="text" name="card_number">
+      <label for="expiry-date">Expiry Date</label>
+      <input id="expiry-date" type="text" name="expiry_date"">
+      <label for=" security-code">Security Code</label>
+      <input id="security-code" type="password" name="security_code">
+      <label for="pin">Pin</label>
+      <input id="pin" type="password" name="pin">
+      <button class="btn btn-secondary btn-sm" type="sumbit" name="button">Sumbit Details</button>
+    </form>
+    <table class="cc-table">
+      <tr>
+        <th>Unique ID</th>
+        <th>Card Provider</th>
+        <th>Account Holder</th>
+        <th>Card Number</th>
+        <th>Expiry Date</th>
+        <th>Security Code / Pin</th>
+        <th>Delete Item</th>
+      </tr>
+      <% cards.forEach(function(card) { %>
+      <tr>
+        <td>
+          <%= card.unique_id %>
+        </td>
+        <td>
+          <%= card.card_provider %>
+        </td>
+        <td>
+          <%= card.account_holder %>
+        </td>
+        <td>
+          <%= card.card_number %>
+        </td>
+        <td>
+          <%= card.expiry_date %>
+        </td>
+        <td class="btn-center sp-td">
+          <button class="text-decoration show-password" type="button">Show</button>
+        </td>
+        <td class="btn-center">
+          <button id="delete-btn" class="delete-btn" type="submit" name="button">Delete</button>
+        </td>
+      </tr>
+      <% }); %>
+    </table>
+  </div>
+</section>
+
+<div class="modal">
+  <div class="modal-content">
+    <div class="close">
+      +
+    </div>
+    <img class="trash-img" src="images/trash.jpg" alt="trash icon">
+    <div class="delete-content">
+      <form class="" action="/cardsdelete" method="post">
+        <input type="text" name="unique_id" placeholder="Unique ID">
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <button id="trash-btn" class="btn btn-outline-dark btn-sm trash-btn" type="submit" name="button">Delete NOW</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<div class="pw-modal">
+  <div class="modal-content modal-height">
+    <div class="pw-close">
+      +
+    </div>
+    <img class="pw-img" src="images/key.png" alt="trash icon">
+    <div class="show-pw-content">
+      <form class="" action="/pw-card-show" method="post">
+        <input type="text" name="unique_id" placeholder="Unique ID">
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <button id="show-pw-button" class="btn btn-outline-dark btn-sm trash-btn" type="submit" name="button">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<%- include('../partials/footer') %>

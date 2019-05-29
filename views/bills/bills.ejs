@@ -1,0 +1,135 @@
+<%- include('../partials/header') %>
+
+<header class='nav-header'>
+  <img class="nav-image" src="https://cdn.pixabay.com/photo/2016/11/27/21/42/stock-1863880_1280.jpg" alt="">
+  <h1 class='logo'>Bills</h1>
+  <input type="checkbox" id="nav-toggle" class="nav-toggle">
+  <nav>
+    <ul>
+      <li><a href="/passwords">Home</a></li>
+      <li><a href="/cards">Credit Cards</a></li>
+      <li><a href="/onlinebanking">Online Banking</a></li>
+      <li><a href="/onlineaccounts">Online Accounts</a></li>
+      <li><a href="/bills">Bills</a></li>
+      <li><a href="/logout">Log Out</a></li>
+    </ul>
+  </nav>
+  <label for="nav-toggle" class="nav-toggle-label"><span></span></label>
+</header>
+
+<section class="main-content">
+  <h1 class="main-header">Manage Bills</h1>
+  <div class="main-management">
+
+    <form class="form" action="/bills" method="post">
+      <h5>Account Credentials</h5>
+      <label for="unique_id">Unique ID</label>
+      <input id="unique_id" type="text" name="unique_id">
+      <label for="company">Company</label>
+      <input id="company" type="text" name="company">
+      <label for="type">Type</label>
+      <select id="type" class="type-dropdown" name="type">
+        <option value="Electric">Electric</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Financial">Financial</option>
+        <option value="Gas">Gas</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Music">Mobile</option>
+        <option value="Music">Music</option>
+        <option value="Video">Video</option>
+        <option value="Social / Sharing">Social / Sharing</option>
+        <option value="Water">Water</option>
+      </select>
+      <label for="url">URL</label>
+      <input id="url" type="url" name="url">
+      <label for="date-debited">Date Debited</label>
+      <input id="date-debited" type="text" name="date_debited">
+      <label for="amount">Amount</label>
+      <input id="amount" type="text" name="amount">
+      <label for="paid">Paid</label>
+      <select id="paid" class="type-dropdown" name="paid">
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+        <option value="Pending">Pending</option>
+      </select>
+      <button class="btn btn-secondary btn-sm block" type="submit" name="button">Submit Details</button>
+    </form>
+    <table class="cc-table">
+      <tr>
+        <th>Unique ID</th>
+        <th>Company</th>
+        <th>Type</th>
+        <th>URL</th>
+        <th>Date Debited</th>
+        <th>Amount</th>
+        <th>Paid</th>
+        <th>Delete Item</th>
+      </tr>
+      <%  bills.forEach(function(bill) { %>
+      <tr>
+        <td>
+          <%= bill.unique_id %>
+        </td>
+        <td> 
+          <%= bill.company %>
+        </td>
+        <td>
+          <%= bill.type %>
+        </td>
+        <td>
+          <a class="text-decoration" href="<%= bill.url %>">Go To Website -></a>
+        </td>
+        <td>
+          <%= bill.date_debited %>
+        </td>
+        <td>
+          <%= bill.amount %>
+        </td>
+        <td>
+          <%= bill.paid %>
+        </td>
+        <td class="btn-center">
+          <button id="delete-btn" class="delete-btn" type="submit" name="button">Delete</button>
+        </td>
+      </tr>
+      <% }); %>
+    </table>
+  </div>
+</section>
+
+
+<div class="modal">
+  <div class="modal-content">
+    <div class="close">
+      +
+    </div>
+    <img class="trash-img" src="images/trash.jpg" alt="trash icon">
+    <div class="delete-content">
+      <form class="" action="/billdelete" method="post">
+        <input type="text" name="unique_id" placeholder="Unique ID">
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <button id="trash-btn" class="btn btn-outline-dark btn-sm trash-btn" type="submit" name="button">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="pw-modal">
+  <div class="modal-content modal-height">
+    <div class="pw-close">
+      +
+    </div>
+    <img class="pw-img" src="images/key.png" alt="trash icon">
+    <div class="show-pw-content">
+      <form class="" action="/pw-bill-show" method="post">
+        <input type="text" name="unique_id" placeholder="Unique ID">
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <button id="show-pw-button" class="btn btn-outline-dark btn-sm trash-btn" type="submit" name="button">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

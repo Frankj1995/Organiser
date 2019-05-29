@@ -11,6 +11,7 @@ const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 
 const secret = process.env.SECRET;
+const dbatlas = process.env.DBATLAS
 
 const app = express();
 
@@ -29,7 +30,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect('mongodb://localhost:27017/passwordDB', {
+mongoose.connect('mongodb+srv://admin-frank:' + dbatlas + '@cluster0-eus86.mongodb.net/organiserDB', {
   useNewUrlParser: true
 });
 
@@ -37,61 +38,26 @@ mongoose.set('useCreateIndex', true);
 
 /***********************************SCHEMAS************************************/
 
-const adminSchema = new mongoose.Schema({
-  username: String,
-  password: String
-});
-
-const passwordSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: [true, 'Please specify a title.']
-  },
-  username: {
-    type: String,
-    require: false
-  },
-  password: {
-    type: {},
-    required: [true, 'Please specify a password.']
-  }
-});
-
 const cardSchema = new mongoose.Schema({
-  unique_id: {
-    type: Number,
-    unique: true,
-    required: true
-  },
+  unique_id: Number,
   card_provider: String,
   account_holder: String,
   card_number: String,
   expiry_date: String,
-  security_code: {
-    type: String,
-    required: true
-  },
+  security_code: String,
   pin: String
 });
 
-const onlineBankSchema = new mongoose.Schema({
-  unique_id: {
-    type: Number,
-    unique: true,
-    required: true
-  },
+const onlinebankSchema = new mongoose.Schema({
+  unique_id: Number,
   bank: String,
   url: String,
   username: String,
   password: String
 });
 
-const onlineAccountSchema = new mongoose.Schema({
-  unique_id: {
-    type: Number,
-    unique: true,
-    required: true
-  },
+const onlineaccountSchema = new mongoose.Schema({
+  unique_id: Number,
   account_provider: String,
   type: String,
   url: String,
@@ -100,11 +66,7 @@ const onlineAccountSchema = new mongoose.Schema({
 });
 
 const billSchema = new mongoose.Schema({
-  unique_id: {
-    type: Number,
-    unique: true,
-    required: true
-  },
+  unique_id: Number,
   company: String,
   type: String,
   url: String,
@@ -113,60 +75,33 @@ const billSchema = new mongoose.Schema({
   paid: String
 });
 
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  card: [cardSchema],
+  onlinebank: [onlinebankSchema],
+  onlineaccount: [onlineaccountSchema],
+  bill: [billSchema]
+});
+
 /***********************************PLUGINS************************************/
 
-adminSchema.plugin(passportLocalMongoose);
-
-cardSchema.plugin(encrypt, {
-  secret: secret,
-  encryptedFields: ['card_number', 'expiry_date', 'pin']
-});
-
-onlineBankSchema.plugin(encrypt, {
-  secret: secret,
-  encryptedFields: ['password']
-});
-
-onlineAccountSchema.plugin(encrypt, {
-  secret: secret,
-  encryptedFields: ['password']
-});
+userSchema.plugin(passportLocalMongoose);
 
 /*********************************COLLECTIONS**********************************/
 
-const Password = mongoose.model('password', passwordSchema);
 const User = mongoose.model('user', userSchema);
 const Card = mongoose.model('card', cardSchema);
-const OnlineBank = mongoose.model('onlineBank', onlineBankSchema);
-const OnlineAccount = mongoose.model('onlineAccount', onlineAccountSchema);
+const OnlineBank = mongoose.model('onlinebank', onlinebankSchema);
+const OnlineAccount = mongoose.model('onlineaccount', onlineaccountSchema);
 const Bill = mongoose.model('bill', billSchema);
 
 /*********************************PASSPORT*************************************/
 
-passport.use(Admin.createStrategy());
+passport.use(User.createStrategy());
 
-passport.serializeUser(Admin.serializeUser());
-passport.deserializeUser(Admin.deserializeUser());
-
-/***********************************BCRYPT*************************************/
-
-function registerAdmin(username, password) {
-  Admin.find(function(err, admin) {
-    if (admin.length === 0) {
-      Admin.register({
-        username: username
-      }, password, function(err, user) {
-        if (err) {
-          console.log(err);
-        } else {
-          passport.authenticate('local')(function() {})
-        }
-      });
-    }
-  })
-}
-
-registerAdmin(adminUsername, adminPassword);
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 /*********************************LOGIN PAGE***********************************/
 
@@ -175,12 +110,12 @@ app.get('/', function(req, res) {
 });
 
 app.post('/login', function(req, res) {
-  const admin = new Admin({
+  const user = new User({
     username: req.body.username,
     password: req.body.password
-  })
+  });
 
-  req.login(admin, function(err) {
+  req.login(user, function(err) {
     if (err) {
       console.log(err);
     } else {
@@ -236,22 +171,19 @@ app.get('/logout', function(req, res) {
 
 app.route('/cards')
   .get(function(req, res) {
-    Card.find(function(err, entry) {
-      if (!err) {
-        if (entry) {
-          res.render('cards', {
-            entries: entry
-          });
-        } else {
-          res.render('cards');
-        }
+    if (req.isAuthenticated()) {
+      if (req.user.card) {
+        res.render('cards/cards', {
+          cards: req.user.card
+        })
       } else {
-        console.log(err);
+        res.render('cards/card');
       }
-    });
+    } else {
+      res.redirect('/');
+    }
   })
   .post(function(req, res) {
-
     const newCard = new Card({
       unique_id: req.body.unique_id,
       card_provider: req.body.card_provider,
@@ -260,242 +192,238 @@ app.route('/cards')
       expiry_date: req.body.expiry_date,
       security_code: req.body.security_code,
       pin: req.body.pin
-    });
+    })
     newCard.save();
+
+    User.findById(req.user.id, function(err, foundUser) {
+      foundUser.card.push(newCard);
+      foundUser.save();
+    });
     res.redirect('/cards');
   });
 
 app.post('/pw-card-show', function(req, res) {
-  const admin = new Admin({
+  const card = req.user.card;
+  const user = new User({
     username: req.body.username,
     password: req.body.password
   });
-  req.login(admin, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      Card.findOne({
-        unique_id: req.body.unique_id
-      }, function(err, card) {
-        if (!err) {
-          if (card) {
-            res.send('Security Code: ' + card.security_code + '  Pin: ' + card.pin);
-          } else {
-            res.send('Please enter a valid unique ID.');
-          }
-        } else {
-          console.log(err);
-        }
-      });
-    }
-  });
+
+  if (req.isAuthenticated()) {
+    req.login(user, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(card);
+      }
+    });
+  } else {
+    res.redirect('/');
+  }
 });
 
 app.post('/cardsdelete', function(req, res) {
-  const admin = new Admin({
+  const userId = req.user.id;
+  const user = new User({
     username: req.body.username,
     password: req.body.password
   });
-  req.login(admin, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      Card.deleteOne({
-        unique_id: req.body.unique_id
-      }, function(err) {
-        if (!err) {
+
+  if (req.isAuthenticated()) {
+    req.login(user, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        User.findByIdAndUpdate(userId, {
+          $pull: {
+            card: {
+              unique_id: req.body.unique_id
+            }
+          }
+        }, function(err) {
           res.redirect('/cards');
-        } else {
-          console.log(err);
-        }
-      });
-    }
-  });
+        });
+      }
+    });
+  }
 });
 
 /*******************************ONLINE BANKING*********************************/
 
 app.route('/onlinebanking')
   .get(function(req, res) {
-    OnlineBank.find(function(err, entry) {
-      if (!err) {
-        if (entry) {
-          res.render('onlinebanking', {
-            entries: entry
-          });
-        } else {
-          res.render('onlinebanking');
-        }
+    if (req.isAuthenticated()) {
+      if (req.user.onlinebank) {
+        res.render('onlinebanking/onlinebanking', {
+          onlinebank: req.user.onlinebank
+        })
       } else {
-        console.log(err);
+        res.render('onlinebanking/onlinebank');
       }
-    });
+    } else {
+      res.redirect('/');
+    }
   })
   .post(function(req, res) {
-    const newOnlineBank = new OnlineBank({
+    const newBank = new OnlineBank({
       unique_id: req.body.unique_id,
       bank: req.body.bank,
       url: req.body.url,
       username: req.body.username,
       password: req.body.password
+    })
+    newBank.save();
+
+    User.findById(req.user.id, function(err, foundUser) {
+      foundUser.onlinebank.push(newBank);
+      foundUser.save();
     });
-    newOnlineBank.save();
-    res.redirect('/onlinebanking');
+    res.redirect('/onlinebanking')
   });
 
 app.post('/pw-ob-show', function(req, res) {
-  const admin = new Admin({
+  const onlinebank = req.user.onlinebank;
+  const user = new User({
     username: req.body.username,
     password: req.body.password
   });
 
-  req.login(admin, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      OnlineBank.findOne({
-        unique_id: req.body.unique_id
-      }, function(err, bank) {
-        if (!err) {
-          if (bank) {
-            res.send('Password: ' + bank.password);
-          } else {
-            res.send('Please enter a valid unique ID.');
-          }
-        } else {
-          console.log(err);
-        }
-      });
-    }
-  });
+  if (req.isAuthenticated()) {
+    req.login(user, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(onlinebank);
+      }
+    });
+  } else {
+    res.redirect('/');
+  }
 });
 
 app.post('/obdelete', function(req, res) {
-  const admin = new Admin({
+  const userId = req.user.id;
+  const user = new User({
     username: req.body.username,
     password: req.body.password
   });
-  req.login(admin, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      OnlineBank.deleteOne({
-        unique_id: req.body.unique_id
-      }, function(err) {
-        if (!err) {
+
+  if (req.isAuthenticated()) {
+    req.login(user, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        User.findByIdAndUpdate(userId, {
+          $pull: {
+            onlinebank: {
+              unique_id: req.body.unique_id
+            }
+          }
+        }, function(err) {
           res.redirect('/onlinebanking');
-        } else {
-          console.log(err);
-        }
-      });
-    }
-  });
+        });
+      }
+    });
+  }
 });
 
 /*******************************ONLINE ACCOUNTS********************************/
 
 app.route('/onlineaccounts')
   .get(function(req, res) {
-    OnlineAccount.find(function(err, entry) {
-      if (!err) {
-        if (entry) {
-          res.render('onlineaccounts', {
-            entries: entry
-          });
-        } else {
-          res.render('onlineaccounts');
-        }
+    if (req.isAuthenticated()) {
+      if (req.user.onlineaccount) {
+        res.render('onlineaccounts/onlineaccounts', {
+          onlineaccount: req.user.onlineaccount
+        })
       } else {
-        console.log(err);
+        res.render('onlineaccounts/onlineaccount');
       }
-    });
+    } else {
+      res.redirect('/');
+    }
   })
   .post(function(req, res) {
-
-    const newOnlineAccount = new OnlineAccount({
+    const newAccount = new OnlineAccount({
       unique_id: req.body.unique_id,
-      account_provider: req.body.ac_provider,
+      account_provider: req.body.account_provider,
       type: req.body.type,
       url: req.body.url,
       username: req.body.username,
       password: req.body.password
+    })
+    newAccount.save();
+
+    User.findById(req.user.id, function(err, foundUser) {
+      foundUser.onlineaccount.push(newAccount);
+      foundUser.save();
     });
-    newOnlineAccount.save(function(err) {
-      if (err) {
-        console.log(err);
-      }
-    });
-    res.redirect('/onlineaccounts');
-  })
+    res.redirect('/onlineaccounts')
+  });
 
 app.post('/pw-oa-show', function(req, res) {
-  const admin = new Admin({
+  const onlineaccount = req.user.onlineaccount;
+  const user = new User({
     username: req.body.username,
     password: req.body.password
   });
-  req.login(admin, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      OnlineAccount.findOne({
-        unique_id: req.body.unique_id
-      }, function(err, account) {
-        if (!err) {
-          if (account) {
-            res.send('Password: ' + account.password);
-          } else {
-            res.send('Please enter a valid unique ID.');
-          }
-        } else {
-          console.log(err);
-        }
-      });
-    }
-  });
+
+  if (req.isAuthenticated()) {
+    req.login(user, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send(onlineaccount);
+      }
+    });
+  } else {
+    res.redirect('/');
+  }
 });
 
 app.post('/oadelete', function(req, res) {
-  const admin = new Admin({
+  const userId = req.user.id;
+  const user = new User({
     username: req.body.username,
     password: req.body.password
   });
-  req.login(admin, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      OnlineAccount.deleteOne({
-        unique_id: req.body.unique_id
-      }, function(err) {
-        if (!err) {
+
+  if (req.isAuthenticated()) {
+    req.login(user, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        User.findByIdAndUpdate(userId, {
+          $pull: {
+            onlineaccount: {
+              unique_id: req.body.unique_id
+            }
+          }
+        }, function(err) {
           res.redirect('/onlineaccounts');
-        } else {
-          console.log(err);
-        }
-      });
-    }
-  });
+        });
+      }
+    });
+  }
 });
 
 /************************************BILLS*************************************/
 
 app.route('/bills')
   .get(function(req, res) {
-    Bill.find(function(err, entry) {
-      if (!err) {
-        if (entry) {
-          res.render('bills', {
-            entries: entry
-          });
-        } else {
-          res.render('bills');
-        }
+    if (req.isAuthenticated()) {
+      if (req.user.bill) {
+        res.render('bills/bills', {
+          bills: req.user.bill
+        })
       } else {
-        console.log(err);
+        res.render('bills/bill');
       }
-    });
+    } else {
+      res.redirect('/');
+    }
   })
   .post(function(req, res) {
-
     const newBill = new Bill({
       unique_id: req.body.unique_id,
       company: req.body.company,
@@ -504,35 +432,40 @@ app.route('/bills')
       date_debited: req.body.date_debited,
       amount: req.body.amount,
       paid: req.body.paid
+    })
+    newBill.save();
+
+    User.findById(req.user.id, function(err, foundUser) {
+      foundUser.bill.push(newBill);
+      foundUser.save();
     });
-    newBill.save(function(err) {
-      if (err) {
-        console.log(err);
-      }
-    });
-    res.redirect('/bills');
+    res.redirect('/bills')
   });
 
 app.post('/billdelete', function(req, res) {
-  const admin = new Admin({
+  const userId = req.user.id;
+  const user = new User({
     username: req.body.username,
     password: req.body.password
   });
-  req.login(admin, function(err) {
-    if (err) {
-      console.log(err);
-    } else {
-      Bill.deleteOne({
-        unique_id: req.body.unique_id
-      }, function(err) {
-        if (!err) {
+
+  if (req.isAuthenticated()) {
+    req.login(user, function(err) {
+      if (err) {
+        console.log(err);
+      } else {
+        User.findByIdAndUpdate(userId, {
+          $pull: {
+            bill: {
+              unique_id: req.body.unique_id
+            }
+          }
+        }, function(err) {
           res.redirect('/bills');
-        } else {
-          console.log(err);
-        }
-      });
-    }
-  });
+        });
+      }
+    });
+  }
 });
 
 app.listen(3000, function() {

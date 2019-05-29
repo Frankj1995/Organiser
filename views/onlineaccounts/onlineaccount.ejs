@@ -1,0 +1,80 @@
+<%- include('../partials/header') %>
+
+<header class='nav-header'>
+  <img class="nav-image" src="https://cdn.pixabay.com/photo/2016/11/27/21/42/stock-1863880_1280.jpg" alt="">
+  <h1 class='logo'>Accounts</h1>
+  <input type="checkbox" id="nav-toggle" class="nav-toggle">
+  <nav>
+    <ul>
+      <li><a href="/passwords">Home</a></li>
+      <li><a href="/cards">Credit Cards</a></li>
+      <li><a href="/onlinebanking">Online Banking</a></li>
+      <li><a href="/onlineaccounts">Online Acconts</a></li>
+      <li><a href="/bills">Bills</a></li>
+      <li><a href="/logout">Log Out</a></li>
+    </ul>
+  </nav>
+  <label for="nav-toggle" class="nav-toggle-label"><span></span></label>
+</header>
+
+<section class="main-content">
+  <h1 class="main-header">Manage Online Accounts</h1>
+  <div class="main-management">
+
+    <form class="form" action="/onlineaccounts" method="post">
+      <h5>Account Credentials</h5>
+      <label for="unique_id">Unique ID</label>
+      <input id="unique_id" type="text" name="unique_id">
+      <label for="ac-provider">Account Provider</label>
+      <input id="ac-provider" type="text" name="account_provider">
+      <label for="type">Type</label>
+      <select id="type" class="type-dropdown" name="type">
+        <option value="Business">Business</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Music">Music</option>
+        <option value="Video">Video</option>
+        <option value="Wiki">Wiki</option>
+        <option value="Social / Sharing">Social / Sharing</option>
+      </select>
+      <label for="url">URL</label>
+      <input id="url" type="url" name="url">
+      <label for="username">Username</label>
+      <input id="username" type="text" name="username">
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password">
+      <button class="btn btn-secondary btn-sm" type="submit" name="button">Submit Details</button>
+    </form>
+    <table class="cc-table">
+      <tr>
+        <th>Unique ID</th>
+        <th>Account Provider</th>
+        <th>Type</th>
+        <th>URL</th>
+        <th>Username</th>
+        <th>Password</th>
+        <th>Delete Item</th>
+      </tr>
+      <tr>
+        <td>
+        </td>
+        <td> 
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td class="btn-center sp-td">
+          <button class="text-decoration show-password" type="button">Show</button>
+        </td>
+        <td class="btn-center">
+          <button id="delete-btn" class="delete-btn" type="submit" name="button">Delete</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

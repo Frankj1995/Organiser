@@ -100,13 +100,26 @@ const Bill = mongoose.model('bill', billSchema);
 
 passport.use(User.createStrategy());
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
+
 
 /*********************************LOGIN PAGE***********************************/
-
+//
 app.get('/', function(req, res) {
   res.render('login');
+});
+
+app.get('/', function(req, res, next) {
+  res.sendfile('./html/auth.html');
 });
 
 app.post('/login', function(req, res) {
